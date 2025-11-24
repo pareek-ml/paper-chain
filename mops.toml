@@ -1,0 +1,8 @@
+[package]
+name = "academicchain"
+version = "0.1.0"
+description = "Decentralized Academic Publishing Platform"
+
+[dependencies]
+base = "0.14.9"
+core = "1.0.0"
