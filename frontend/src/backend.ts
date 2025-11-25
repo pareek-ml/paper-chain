@@ -5,6 +5,8 @@ import {
   canisterId as backend_canister_id,
 } from "../declarations/backend";
 
+export type { Paper, Review, UserProfile } from "../declarations/backend";
+
 // ---- ExternalBlob type + value ----
 // Caffeine uses this shape for external file/blob metadata.
 // We export both a type and a runtime value so both TS and Rollup are happy.

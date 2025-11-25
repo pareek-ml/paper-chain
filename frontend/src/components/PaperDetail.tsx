@@ -21,9 +21,8 @@ export default function PaperDetail({ paperId, onBack, onNavigateToPaper }: Pape
   const { data: paper, isLoading: paperLoading } = useGetPaper(paperId);
   const { data: reviews, isLoading: reviewsLoading } = useGetReviewsForPaper(paperId);
   const { data: allPapers } = useGetAllPapers();
-  const { identity } = useInternetIdentity();
-  const isAuthenticated = !!identity;
-  
+  const { principal, isAuthenticated } = useInternetIdentity();
+
   const [showReviewDialog, setShowReviewDialog] = useState(false);
 
   const formatDate = (timestamp: bigint) => {
@@ -31,8 +30,8 @@ export default function PaperDetail({ paperId, onBack, onNavigateToPaper }: Pape
     return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   };
 
-  const isAuthor = paper && identity && paper.author.toString() === identity.getPrincipal().toString();
-  const hasReviewed = reviews?.some(r => identity && r.reviewer.toString() === identity.getPrincipal().toString());
+  const isAuthor = paper && principal && paper.author.toString() === principal;
+  const hasReviewed = reviews?.some(r => principal && r.reviewer.toString() === principal);
 
   // Get cited papers details with proper type narrowing
   const citedPapers: Paper[] = paper?.citations
@@ -118,7 +117,7 @@ export default function PaperDetail({ paperId, onBack, onNavigateToPaper }: Pape
                 )}
               </div>
             </div>
-            
+
             {paper.aggregateRating > 0 && (
               <Badge variant="secondary" className="text-lg px-4 py-2 gap-2">
                 <Star className="h-5 w-5 fill-current" />
@@ -127,7 +126,7 @@ export default function PaperDetail({ paperId, onBack, onNavigateToPaper }: Pape
             )}
           </div>
         </CardHeader>
-        
+
         <CardContent className="space-y-6">
           <div>
             <h3 className="font-semibold mb-2">Abstract</h3>
@@ -142,8 +141,8 @@ export default function PaperDetail({ paperId, onBack, onNavigateToPaper }: Pape
               </h3>
               <div className="space-y-2">
                 {citedPapers.map((citedPaper) => (
-                  <Card 
-                    key={citedPaper.id} 
+                  <Card
+                    key={citedPaper.id}
                     className="hover:bg-accent/50 transition-colors cursor-pointer"
                     onClick={() => handleCitedPaperClick(citedPaper.id)}
                   >
@@ -176,7 +175,7 @@ export default function PaperDetail({ paperId, onBack, onNavigateToPaper }: Pape
                 Download Paper
               </Button>
             )}
-            
+
             {paper.externalLink && (
               <Button asChild variant="outline" className="gap-2">
                 <a href={paper.externalLink} target="_blank" rel="noopener noreferrer">
@@ -185,7 +184,7 @@ export default function PaperDetail({ paperId, onBack, onNavigateToPaper }: Pape
                 </a>
               </Button>
             )}
-            
+
             {isAuthenticated && !isAuthor && !hasReviewed && (
               <Button onClick={() => setShowReviewDialog(true)} className="gap-2">
                 <MessageSquare className="h-4 w-4" />

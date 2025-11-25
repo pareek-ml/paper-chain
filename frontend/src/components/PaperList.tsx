@@ -16,14 +16,13 @@ interface PaperListProps {
 
 export default function PaperList({ onViewPaper }: PaperListProps) {
   const { data: papers, isLoading } = useGetAllPapers();
-  const { identity } = useInternetIdentity();
-  const isAuthenticated = !!identity;
-  
+  const { isAuthenticated } = useInternetIdentity();
+
   const [searchQuery, setSearchQuery] = useState('');
   const [showSubmitDialog, setShowSubmitDialog] = useState(false);
   const [sortBy, setSortBy] = useState<'recent' | 'rating'>('recent');
 
-  const filteredPapers = papers?.filter(paper => 
+  const filteredPapers = papers?.filter(paper =>
     paper.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     paper.abstract.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
@@ -48,7 +47,7 @@ export default function PaperList({ onViewPaper }: PaperListProps) {
             <h2 className="text-3xl font-bold tracking-tight">Published Papers</h2>
             <p className="text-muted-foreground">Browse and review academic research</p>
           </div>
-          
+
           {isAuthenticated && (
             <Button onClick={() => setShowSubmitDialog(true)} className="gap-2">
               <Plus className="h-4 w-4" />
@@ -67,7 +66,7 @@ export default function PaperList({ onViewPaper }: PaperListProps) {
               className="pl-10"
             />
           </div>
-          
+
           <div className="flex gap-2">
             <Button
               variant={sortBy === 'recent' ? 'secondary' : 'outline'}
@@ -113,8 +112,8 @@ export default function PaperList({ onViewPaper }: PaperListProps) {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {sortedPapers.map((paper) => (
-              <Card 
-                key={paper.id} 
+              <Card
+                key={paper.id}
                 className="hover:shadow-lg transition-shadow cursor-pointer group"
                 onClick={() => onViewPaper(paper.id)}
               >
@@ -145,7 +144,7 @@ export default function PaperList({ onViewPaper }: PaperListProps) {
                       {Number(paper.reviewCount)} reviews
                     </div>
                   </div>
-                  
+
                   <div className="flex gap-2">
                     {paper.fileReference && (
                       <Badge variant="outline" className="gap-1">

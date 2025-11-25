@@ -23,8 +23,8 @@ interface SubmitPaperDialogProps {
 export default function SubmitPaperDialog({ open, onOpenChange }: SubmitPaperDialogProps) {
   const submitPaper = useSubmitPaper();
   const { data: allPapers } = useGetAllPapers();
-  const { identity } = useInternetIdentity();
-  
+  const { principal } = useInternetIdentity();
+
   const [title, setTitle] = useState('');
   const [abstract, setAbstract] = useState('');
   const [externalLink, setExternalLink] = useState('');
@@ -41,28 +41,28 @@ export default function SubmitPaperDialog({ open, onOpenChange }: SubmitPaperDia
 
   // Determine which papers the user has reviewed
   const reviewedPaperIds = useMemo(() => {
-    if (!allPapers || !identity) return new Set<string>();
-    
+    if (!allPapers || !principal) return new Set<string>();
+
     const reviewed = new Set<string>();
     allPapers.forEach(paper => {
       // We need to check reviews for each paper
       // This is a simplified approach - in production, you might want to optimize this
       // by having a backend endpoint that returns papers reviewed by the current user
     });
-    
+
     return reviewed;
-  }, [allPapers, identity]);
+  }, [allPapers, principal]);
 
   // Get papers that can be cited (papers that exist and user has reviewed)
   const citablePapers = useMemo(() => {
-    if (!allPapers || !identity) return [];
-    
+    if (!allPapers || !principal) return [];
+
     // For now, we'll show all papers and let the backend validate
     // In a production app, you'd want to fetch which papers the user has reviewed
-    return allPapers.filter(paper => 
-      paper.author.toString() !== identity.getPrincipal().toString()
+    return allPapers.filter(paper =>
+      paper.author.toString() !== principal
     );
-  }, [allPapers, identity]);
+  }, [allPapers, principal]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -71,8 +71,8 @@ export default function SubmitPaperDialog({ open, onOpenChange }: SubmitPaperDia
   };
 
   const handleCitationToggle = (paperId: string) => {
-    setSelectedCitations(prev => 
-      prev.includes(paperId) 
+    setSelectedCitations(prev =>
+      prev.includes(paperId)
         ? prev.filter(id => id !== paperId)
         : [...prev, paperId]
     );
@@ -80,7 +80,7 @@ export default function SubmitPaperDialog({ open, onOpenChange }: SubmitPaperDia
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!title.trim() || !abstract.trim()) {
       toast.error('Please fill in all required fields');
       return;
@@ -98,9 +98,9 @@ export default function SubmitPaperDialog({ open, onOpenChange }: SubmitPaperDia
 
     try {
       const id = `paper-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      
+
       let fileReference: ExternalBlob | null = null;
-      
+
       if (submissionType === 'file' && file) {
         const arrayBuffer = await file.arrayBuffer();
         const uint8Array = new Uint8Array(arrayBuffer);
@@ -119,7 +119,7 @@ export default function SubmitPaperDialog({ open, onOpenChange }: SubmitPaperDia
       });
 
       toast.success('Paper submitted successfully! You earned 10 tokens.');
-      
+
       setTitle('');
       setAbstract('');
       setExternalLink('');
@@ -130,7 +130,7 @@ export default function SubmitPaperDialog({ open, onOpenChange }: SubmitPaperDia
     } catch (error: any) {
       console.error('Error submitting paper:', error);
       const errorMessage = error.message || 'Failed to submit paper';
-      
+
       // Check if error is about citation validation
       if (errorMessage.includes('must review')) {
         toast.error('Citation Error: ' + errorMessage);
@@ -237,7 +237,7 @@ export default function SubmitPaperDialog({ open, onOpenChange }: SubmitPaperDia
                 </Tooltip>
               </TooltipProvider>
             </div>
-            
+
             {citablePapers.length > 0 ? (
               <ScrollArea className="h-48 rounded-md border p-4">
                 <div className="space-y-3">
@@ -266,7 +266,7 @@ export default function SubmitPaperDialog({ open, onOpenChange }: SubmitPaperDia
                 No papers available to cite. Review papers to cite them in your submissions.
               </div>
             )}
-            
+
             {selectedCitations.length > 0 && (
               <p className="text-sm text-muted-foreground">
                 {selectedCitations.length} paper{selectedCitations.length !== 1 ? 's' : ''} selected

@@ -13,17 +13,16 @@ interface HeaderProps {
 }
 
 export default function Header({ currentView, onNavigateHome, onNavigateDashboard }: HeaderProps) {
-  const { login, clear, loginStatus, identity } = useInternetIdentity();
+  const { login, logout, isAuthenticated } = useInternetIdentity();
   const { data: userProfile } = useGetCallerUserProfile();
   const queryClient = useQueryClient();
 
-  const isAuthenticated = !!identity;
-  const disabled = loginStatus === 'logging-in';
-  const buttonText = loginStatus === 'logging-in' ? 'Logging in...' : isAuthenticated ? 'Logout' : 'Login';
+  const buttonText = isAuthenticated ? 'Logout' : 'Login';
+  const disabled = false;
 
   const handleAuth = async () => {
     if (isAuthenticated) {
-      await clear();
+      await logout();
       queryClient.clear();
       onNavigateHome();
     } else {
@@ -31,10 +30,6 @@ export default function Header({ currentView, onNavigateHome, onNavigateDashboar
         await login();
       } catch (error: any) {
         console.error('Login error:', error);
-        if (error.message === 'User is already authenticated') {
-          await clear();
-          setTimeout(() => login(), 300);
-        }
       }
     }
   };
@@ -43,13 +38,13 @@ export default function Header({ currentView, onNavigateHome, onNavigateDashboar
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-6">
-          <button 
+          <button
             onClick={onNavigateHome}
             className="flex items-center gap-2 hover:opacity-80 transition-opacity"
           >
-            <img 
-              src="/assets/generated/academic-logo-transparent.dim_200x200.png" 
-              alt="Academic Publishing" 
+            <img
+              src="/assets/generated/academic-logo-transparent.dim_200x200.png"
+              alt="Academic Publishing"
               className="h-10 w-10"
             />
             <div className="flex flex-col items-start">
@@ -57,7 +52,7 @@ export default function Header({ currentView, onNavigateHome, onNavigateDashboar
               <span className="text-xs text-muted-foreground">Decentralized Publishing</span>
             </div>
           </button>
-          
+
           {isAuthenticated && (
             <nav className="hidden md:flex items-center gap-2">
               <Button
@@ -99,7 +94,7 @@ export default function Header({ currentView, onNavigateHome, onNavigateDashboar
               </div>
             </div>
           )}
-          
+
           <Button
             onClick={handleAuth}
             disabled={disabled}

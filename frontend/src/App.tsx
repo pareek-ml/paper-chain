@@ -14,12 +14,10 @@ import { ThemeProvider } from 'next-themes';
 export type View = 'home' | 'paper-detail' | 'dashboard';
 
 function App() {
-  // const { identity } = useInternetIdentity();
-  // const isAuthenticated = !!identity;
-  const isAuthenticated = false; // Placeholder until authentication is implemented
-  
+  const { isAuthenticated } = useInternetIdentity();
+
   const { data: userProfile, isLoading: profileLoading, isFetched } = useGetCallerUserProfile();
-  
+
   const [currentView, setCurrentView] = useState<View>('home');
   const [selectedPaperId, setSelectedPaperId] = useState<string | null>(null);
 
@@ -46,12 +44,12 @@ function App() {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <div className="min-h-screen flex flex-col bg-background">
-        <Header 
+        <Header
           currentView={currentView}
           onNavigateHome={handleNavigateToHome}
           onNavigateDashboard={handleNavigateToDashboard}
         />
-        
+
         <main className="flex-1">
           {currentView === 'home' && (
             <>
@@ -59,20 +57,24 @@ function App() {
               <PaperList onViewPaper={handleViewPaper} />
             </>
           )}
-          
+
           {currentView === 'paper-detail' && selectedPaperId && (
-            <PaperDetail paperId={selectedPaperId} onBack={handleBackToHome} />
+            <PaperDetail
+              paperId={selectedPaperId}
+              onBack={handleBackToHome}
+              onNavigateToPaper={handleViewPaper}
+            />
           )}
-          
+
           {currentView === 'dashboard' && (
             <UserDashboard onViewPaper={handleViewPaper} />
           )}
         </main>
-        
+
         <Footer />
-        
+
         {showProfileSetup && <ProfileSetupModal />}
-        
+
         <Toaster />
       </div>
     </ThemeProvider>
