@@ -6,11 +6,15 @@
       "args": "--enhanced-orthogonal-persistence"
     },
     "frontend": {
-      "dependencies": ["backend"],
+      "dependencies": [
+        "backend"
+      ],
       "frontend": {
-        "entrypoint": "frontend/index.html"
+        "entrypoint": "frontend/dist/index.html"
       },
-      "source": ["frontend/dist"],
+      "source": [
+        "frontend/dist"
+      ],
       "type": "assets"
     }
   },

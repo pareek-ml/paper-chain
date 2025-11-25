@@ -14,8 +14,9 @@ import { ThemeProvider } from 'next-themes';
 export type View = 'home' | 'paper-detail' | 'dashboard';
 
 function App() {
-  const { identity } = useInternetIdentity();
-  const isAuthenticated = !!identity;
+  // const { identity } = useInternetIdentity();
+  // const isAuthenticated = !!identity;
+  const isAuthenticated = false; // Placeholder until authentication is implemented
   
   const { data: userProfile, isLoading: profileLoading, isFetched } = useGetCallerUserProfile();
   

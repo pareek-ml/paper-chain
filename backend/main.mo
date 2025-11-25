@@ -10,16 +10,12 @@ import Iter "mo:base/Iter";
 import Float "mo:base/Float";
 import List "mo:base/List";
 
-import Migration "migration";
-
-// Specify the data migration function in with-clause
-(with migration = Migration.run)
-actor Main {
-  let storage = Storage.new();
-  include MixinStorage(storage);
+persistent actor Main {
+  transient let storage = Storage.new();
+  // include MixinStorage(storage);
 
   // Initialize the user system state
-  let accessControlState = AccessControl.initState();
+  transient let accessControlState = AccessControl.initState();
 
   // Initialize auth (first caller becomes admin, others become users)
   public shared ({ caller }) func initializeAccessControl() : async () {
@@ -46,7 +42,7 @@ actor Main {
   };
 
   transient let principalMap = OrderedMap.Make<Principal>(Principal.compare);
-  var userProfiles = principalMap.empty<UserProfile>();
+  transient var userProfiles = principalMap.empty<UserProfile>();
 
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
@@ -92,8 +88,8 @@ actor Main {
   };
 
   transient let textMap = OrderedMap.Make<Text>(Text.compare);
-  var papers = textMap.empty<Paper>();
-  var reviews = textMap.empty<Review>();
+  transient var papers = textMap.empty<Paper>();
+  transient var reviews = textMap.empty<Review>();
 
   public shared ({ caller }) func submitPaper(
     id : Text,
