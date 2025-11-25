@@ -4,7 +4,6 @@ import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
-import { Separator } from './ui/separator';
 import { Skeleton } from './ui/skeleton';
 import { ArrowLeft, Calendar, Star, ExternalLink, FileText, Download, MessageSquare, FileCheck } from 'lucide-react';
 import SubmitReviewDialog from './SubmitReviewDialog';
@@ -39,21 +38,19 @@ export default function PaperDetail({ paperId, onBack, onNavigateToPaper }: Pape
     .filter((p): p is Paper => p !== undefined) || [];
 
   const handleDownload = async () => {
-    if (paper?.fileReference) {
-      try {
-        const bytes = await paper.fileReference.getBytes();
-        const blob = new Blob([bytes], { type: 'application/pdf' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${paper.title}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      } catch (error) {
-        console.error('Error downloading file:', error);
-      }
+    if (!paper) return;
+    const ref: any = (paper as any).fileReference?.[0] ?? (paper as any).fileReference;
+    if (ref && typeof ref.getBytes === 'function') {
+      const bytes = await ref.getBytes();
+      const blob = new Blob([bytes], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${paper.title}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     }
   };
 
@@ -177,12 +174,17 @@ export default function PaperDetail({ paperId, onBack, onNavigateToPaper }: Pape
             )}
 
             {paper.externalLink && (
-              <Button asChild variant="outline" className="gap-2">
-                <a href={paper.externalLink} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="h-4 w-4" />
-                  View External Link
-                </a>
-              </Button>
+              (() => {
+                const href: any = Array.isArray(paper.externalLink)
+                  ? paper.externalLink[0]
+                  : paper.externalLink;
+                return href ? (
+                  <Button variant="outline" className="gap-2" onClick={() => window.open(href, '_blank') }>
+                    <ExternalLink className="h-4 w-4" />
+                    View External Link
+                  </Button>
+                ) : null;
+              })()
             )}
 
             {isAuthenticated && !isAuthor && !hasReviewed && (

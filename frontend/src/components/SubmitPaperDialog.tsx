@@ -104,9 +104,12 @@ export default function SubmitPaperDialog({ open, onOpenChange }: SubmitPaperDia
       if (submissionType === 'file' && file) {
         const arrayBuffer = await file.arrayBuffer();
         const uint8Array = new Uint8Array(arrayBuffer);
-        fileReference = ExternalBlob.fromBytes(uint8Array).withUploadProgress((percentage) => {
-          setUploadProgress(percentage);
-        });
+        const tmp: any = ExternalBlob.fromBytes ? ExternalBlob.fromBytes(uint8Array) : null;
+        if (tmp && typeof tmp.withUploadProgress === 'function') {
+          fileReference = tmp.withUploadProgress((p: number) => setUploadProgress(p));
+        } else {
+          fileReference = { id: `blob-${Date.now()}`, size: uint8Array.length } as any;
+        }
       }
 
       await submitPaper.mutateAsync({

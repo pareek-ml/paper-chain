@@ -4,7 +4,7 @@ import type { Paper, Review, UserProfile } from '../backend';
 import { ExternalBlob } from '../backend';
 
 export function useGetCallerUserProfile() {
-  const { actor, isFetching: actorFetching } = useActor();
+  const { actor } = useActor();
 
   const query = useQuery<UserProfile | null>({
     queryKey: ['currentUserProfile'],
@@ -12,13 +12,13 @@ export function useGetCallerUserProfile() {
       if (!actor) throw new Error('Actor not available');
       return actor.getCallerUserProfile();
     },
-    enabled: !!actor && !actorFetching,
+    enabled: !!actor,
     retry: false,
   });
 
   return {
     ...query,
-    isLoading: actorFetching || query.isLoading,
+    isLoading: query.isLoading,
     isFetched: !!actor && query.isFetched,
   };
 }
@@ -39,7 +39,7 @@ export function useSaveCallerUserProfile() {
 }
 
 export function useGetAllPapers() {
-  const { actor, isFetching } = useActor();
+  const { actor } = useActor();
 
   return useQuery<Paper[]>({
     queryKey: ['papers'],
@@ -47,12 +47,12 @@ export function useGetAllPapers() {
       if (!actor) return [];
       return actor.getAllPapers();
     },
-    enabled: !!actor && !isFetching,
+    enabled: !!actor,
   });
 }
 
 export function useGetPaper(paperId: string | null) {
-  const { actor, isFetching } = useActor();
+  const { actor } = useActor();
 
   return useQuery<Paper | null>({
     queryKey: ['paper', paperId],
@@ -60,7 +60,7 @@ export function useGetPaper(paperId: string | null) {
       if (!actor || !paperId) return null;
       return actor.getPaper(paperId);
     },
-    enabled: !!actor && !isFetching && !!paperId,
+    enabled: !!actor && !!paperId,
   });
 }
 
@@ -95,7 +95,7 @@ export function useSubmitPaper() {
 }
 
 export function useGetReviewsForPaper(paperId: string | null) {
-  const { actor, isFetching } = useActor();
+  const { actor } = useActor();
 
   return useQuery<Review[]>({
     queryKey: ['reviews', paperId],
@@ -103,7 +103,7 @@ export function useGetReviewsForPaper(paperId: string | null) {
       if (!actor || !paperId) return [];
       return actor.getReviewsForPaper(paperId);
     },
-    enabled: !!actor && !isFetching && !!paperId,
+    enabled: !!actor && !!paperId,
   });
 }
 
@@ -136,7 +136,7 @@ export function useSubmitReview() {
 }
 
 export function useGetUserTokenBalance() {
-  const { actor, isFetching } = useActor();
+  const { actor } = useActor();
 
   return useQuery<bigint>({
     queryKey: ['tokenBalance'],
@@ -144,6 +144,6 @@ export function useGetUserTokenBalance() {
       if (!actor) return BigInt(0);
       return actor.getUserTokenBalance();
     },
-    enabled: !!actor && !isFetching,
+    enabled: !!actor,
   });
 }

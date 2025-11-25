@@ -13,12 +13,13 @@ interface HeaderProps {
 }
 
 export default function Header({ currentView, onNavigateHome, onNavigateDashboard }: HeaderProps) {
-  const { login, logout, isAuthenticated } = useInternetIdentity();
+  const { login, logout, identity } = useInternetIdentity();
   const { data: userProfile } = useGetCallerUserProfile();
   const queryClient = useQueryClient();
 
-  const buttonText = isAuthenticated ? 'Logout' : 'Login';
+  const isAuthenticated = !!identity;
   const disabled = false;
+  const buttonText = isAuthenticated ? 'Logout' : 'Login';
 
   const handleAuth = async () => {
     if (isAuthenticated) {
@@ -26,11 +27,7 @@ export default function Header({ currentView, onNavigateHome, onNavigateDashboar
       queryClient.clear();
       onNavigateHome();
     } else {
-      try {
-        await login();
-      } catch (error: any) {
-        console.error('Login error:', error);
-      }
+      await login();
     }
   };
 
@@ -56,8 +53,7 @@ export default function Header({ currentView, onNavigateHome, onNavigateDashboar
           {isAuthenticated && (
             <nav className="hidden md:flex items-center gap-2">
               <Button
-                variant={currentView === 'home' ? 'secondary' : 'ghost'}
-                size="sm"
+                variant={currentView === 'home' ? 'default' : 'ghost'}
                 onClick={onNavigateHome}
                 className="gap-2"
               >
@@ -65,8 +61,7 @@ export default function Header({ currentView, onNavigateHome, onNavigateDashboar
                 Papers
               </Button>
               <Button
-                variant={currentView === 'dashboard' ? 'secondary' : 'ghost'}
-                size="sm"
+                variant={currentView === 'dashboard' ? 'default' : 'ghost'}
                 onClick={onNavigateDashboard}
                 className="gap-2"
               >
@@ -99,7 +94,6 @@ export default function Header({ currentView, onNavigateHome, onNavigateDashboar
             onClick={handleAuth}
             disabled={disabled}
             variant={isAuthenticated ? 'outline' : 'default'}
-            size="sm"
           >
             {buttonText}
           </Button>

@@ -69,15 +69,13 @@ export default function PaperList({ onViewPaper }: PaperListProps) {
 
           <div className="flex gap-2">
             <Button
-              variant={sortBy === 'recent' ? 'secondary' : 'outline'}
-              size="sm"
+              variant={sortBy === 'recent' ? 'default' : 'outline'}
               onClick={() => setSortBy('recent')}
             >
               Recent
             </Button>
             <Button
-              variant={sortBy === 'rating' ? 'secondary' : 'outline'}
-              size="sm"
+              variant={sortBy === 'rating' ? 'default' : 'outline'}
               onClick={() => setSortBy('rating')}
             >
               Top Rated

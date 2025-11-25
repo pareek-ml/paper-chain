@@ -1,0 +1,58 @@
+type UserRole = 
+ variant {
+   admin;
+   guest;
+   user;
+ };
+type UserProfile = 
+ record {
+   name: text;
+   reputation: nat;
+   tokenBalance: nat;
+ };
+type Time = int;
+type Review = 
+ record {
+   feedback: text;
+   id: text;
+   paperId: text;
+   rating: nat;
+   reviewer: principal;
+   submissionDate: Time;
+ };
+type Paper = 
+ record {
+   abstract: text;
+   aggregateRating: float64;
+   author: principal;
+   citations: vec text;
+   externalLink: opt text;
+   fileReference: opt ExternalBlob;
+   id: text;
+   reviewCount: nat;
+   submissionDate: Time;
+   title: text;
+ };
+type ExternalBlob = 
+ record {
+   filename: text;
+   id: text;
+   mimeType: text;
+   size: nat;
+ };
+service : {
+  assignCallerUserRole: (user: principal, role: UserRole) -> ();
+  getAllPapers: () -> (vec Paper) query;
+  getCallerUserProfile: () -> (opt UserProfile) query;
+  getCallerUserRole: () -> (UserRole) query;
+  getPaper: (id: text) -> (opt Paper) query;
+  getReviewsForPaper: (paperId: text) -> (vec Review) query;
+  getUserProfile: (user: principal) -> (opt UserProfile) query;
+  getUserTokenBalance: () -> (nat) query;
+  initializeAccessControl: () -> ();
+  isCallerAdmin: () -> (bool) query;
+  saveCallerUserProfile: (profile: UserProfile) -> ();
+  submitPaper: (id: text, title: text, abstract: text, fileReference:
+   opt ExternalBlob, externalLink: opt text, citations: vec text) -> ();
+  submitReview: (id: text, paperId: text, rating: nat, feedback: text) -> ();
+}

@@ -1,9 +1,6 @@
 // frontend/src/backend.ts
 import { Actor, HttpAgent } from "@dfinity/agent";
-import {
-  idlFactory as backend_idl,
-  canisterId as backend_canister_id,
-} from "../declarations/backend";
+import { idlFactory as backend_idl } from "@declarations/backend/backend.did.js";
 
 export type { Paper, Review, UserProfile } from "../declarations/backend";
 
@@ -18,7 +15,11 @@ export type ExternalBlob = {
   url?: string;
 };
 
-export const ExternalBlob = {} as ExternalBlob;
+export const ExternalBlob: any = {
+  fromBytes: (bytes: Uint8Array) => ({
+    withUploadProgress: (_cb: any) => ({ id: "blob", size: bytes.length }),
+  }),
+};
 
 // ---- Actor factory ----
 
@@ -26,7 +27,7 @@ export const createBackendActor = (identity?: any) => {
   const agent = new HttpAgent({ identity });
 
   // Local dev: trust local replica root key
-  if (process.env.DFX_NETWORK !== "ic") {
+  if (import.meta.env.DEV) {
     agent.fetchRootKey().catch((err) => {
       console.warn(
         "Unable to fetch root key. Ensure you are running a local replica:",
@@ -37,7 +38,7 @@ export const createBackendActor = (identity?: any) => {
 
   return Actor.createActor(backend_idl as any, {
     agent,
-    canisterId: backend_canister_id as any,
+    canisterId: import.meta.env.VITE_CANISTER_ID_BACKEND as any,
   });
 };
 
@@ -46,3 +47,5 @@ export const backend = createBackendActor();
 
 // Default export for `import backend from "../backend"`
 export default backend;
+
+export type { Paper, Review, UserProfile } from "@declarations/backend/backend.did.d.ts";

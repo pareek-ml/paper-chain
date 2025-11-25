@@ -2,10 +2,7 @@
 import React, { useState, useEffect, useCallback, useContext, createContext } from "react";
 import { AuthClient } from "@dfinity/auth-client";
 import { Actor, HttpAgent } from "@dfinity/agent";
-import {
-  idlFactory as backend_idl,
-  canisterId as backend_canister_id,
-} from "../../../declarations/backend";
+import { idlFactory as backend_idl } from "@declarations/backend/backend.did.js";
 
 interface InternetIdentityContextType {
   isAuthenticated: boolean;
@@ -32,6 +29,7 @@ export const InternetIdentityProvider: React.FC<{ children: React.ReactNode }> =
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [principal, setPrincipal] = useState<string | null>(null);
   const [backendActor, setBackendActor] = useState<any>(null);
+  const [identity, setIdentity] = useState<any>(null);
 
   useEffect(() => {
     AuthClient.create().then(async (client) => {
@@ -40,14 +38,15 @@ export const InternetIdentityProvider: React.FC<{ children: React.ReactNode }> =
       setIsAuthenticated(authenticated);
 
       if (authenticated) {
-        const identity = client.getIdentity();
-        const principalId = identity.getPrincipal().toText();
+        const id = client.getIdentity();
+        setIdentity(id);
+        const principalId = id.getPrincipal().toText();
         setPrincipal(principalId);
 
-        const agent = new HttpAgent({ identity });
+        const agent = new HttpAgent({ identity: id });
         const actor = Actor.createActor(backend_idl as any, {
           agent,
-          canisterId: backend_canister_id as any,
+          canisterId: import.meta.env.VITE_CANISTER_ID_BACKEND as any,
         });
 
         setBackendActor(actor);
@@ -60,15 +59,16 @@ export const InternetIdentityProvider: React.FC<{ children: React.ReactNode }> =
     await authClient.login({
       identityProvider: "https://identity.ic0.app/#authorize",
       onSuccess: async () => {
-        const identity = authClient.getIdentity();
-        const principalId = identity.getPrincipal().toText();
+        const id = authClient.getIdentity();
+        setIdentity(id);
+        const principalId = id.getPrincipal().toText();
         setPrincipal(principalId);
         setIsAuthenticated(true);
 
-        const agent = new HttpAgent({ identity });
+        const agent = new HttpAgent({ identity: id });
         const actor = Actor.createActor(backend_idl as any, {
           agent,
-          canisterId: backend_canister_id as any,
+          canisterId: import.meta.env.VITE_CANISTER_ID_BACKEND as any,
         });
         setBackendActor(actor);
       },
@@ -88,6 +88,7 @@ export const InternetIdentityProvider: React.FC<{ children: React.ReactNode }> =
   const value = {
     isAuthenticated,
     principal,
+    identity,
     backendActor,
     login,
     logout,
