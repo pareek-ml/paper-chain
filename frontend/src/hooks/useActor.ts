@@ -13,7 +13,7 @@ export type UseActorResult = {
  * created in useInternetIdentity, plus some status flags.
  */
 export function useActor(): UseActorResult {
-  const { backendActor, isAuthenticated } = useInternetIdentity() as any;
+  const { backendActor, isAuthenticated } = useInternetIdentity();
 
   const isReady = Boolean(backendActor && isAuthenticated);
 

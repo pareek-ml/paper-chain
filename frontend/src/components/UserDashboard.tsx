@@ -11,13 +11,13 @@ interface UserDashboardProps {
 }
 
 export default function UserDashboard({ onViewPaper }: UserDashboardProps) {
-  const { identity } = useInternetIdentity();
+  const { principal } = useInternetIdentity();
   const { data: userProfile, isLoading: profileLoading } = useGetCallerUserProfile();
   const { data: allPapers, isLoading: papersLoading } = useGetAllPapers();
   const { data: tokenBalance, isLoading: balanceLoading } = useGetUserTokenBalance();
 
   const userPapers = allPapers?.filter(
-    paper => identity && paper.author.toString() === identity.getPrincipal().toString()
+    paper => principal && paper.author.toString() === principal
   ) || [];
 
   const totalReviews = userPapers.reduce((sum, paper) => sum + Number(paper.reviewCount), 0);

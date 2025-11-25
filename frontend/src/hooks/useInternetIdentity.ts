@@ -1,5 +1,5 @@
 // frontend/src/hooks/useInternetIdentity.ts
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useContext, createContext } from "react";
 import { AuthClient } from "@dfinity/auth-client";
 import { Actor, HttpAgent } from "@dfinity/agent";
 import {
@@ -7,7 +7,27 @@ import {
   canisterId as backend_canister_id,
 } from "../../../declarations/backend";
 
+interface InternetIdentityContextType {
+  isAuthenticated: boolean;
+  principal: string | null;
+  backendActor: any;
+  login: () => Promise<void>;
+  logout: () => Promise<void>;
+}
+
+const InternetIdentityContext = createContext<InternetIdentityContextType | null>(null);
+
 export const useInternetIdentity = () => {
+  const context = useContext(InternetIdentityContext);
+  if (!context) {
+    throw new Error("useInternetIdentity must be used within an InternetIdentityProvider");
+  }
+  return context;
+};
+
+export const InternetIdentityProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [authClient, setAuthClient] = useState<AuthClient | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [principal, setPrincipal] = useState<string | null>(null);
@@ -65,20 +85,13 @@ export const useInternetIdentity = () => {
     }
   }, [authClient]);
 
-  return {
+  const value = {
     isAuthenticated,
     principal,
     backendActor,
     login,
     logout,
   };
-};
 
-// NEW: provider expected by main.tsx
-export const InternetIdentityProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  useInternetIdentity();
-  // Avoid JSX in .ts file
-  return React.createElement(React.Fragment, null, children);
+  return React.createElement(InternetIdentityContext.Provider, { value }, children);
 };
